@@ -1,0 +1,7 @@
+---
+ignore_git_branch : true
+deployments:
+  - modules:
+      - path: cet17.cfn
+    regions:
+      - us-east-2

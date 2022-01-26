@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  ●	VPC CFN 
+    ○	Resources 
+      ■	VPC.
+      ■	2 public subnets in 2 different Availability Zones.
+      ■	2 private subnets in 2 different Availability Zones.
+      ■	Internet Gateway.
+      ■	Route Tables and Routes.
+      ■	Network Access Control List.
+      ■	NAT Gateway.
+    ○	Parameters
+      ■	VPC CIDR.
+      ■	Subnets CIDRs.
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - Label: 
+          default: "Lab Setup"
+        Parameters: 
+          - BucketName
+          - LabName
+          - MandatoryTagKey
+          - MandatoryTagValue
+      - Label: 
+          default: "Lab Parameters"
+        Parameters: 
+          - VPCCIDR
+          - PublicSubnet1Cidr
+          - PublicSubnet2Cidr
+          - PrivateSubnet1Cidr
+          - PrivateSubnet2Cidr
+    ParameterLabels: 
+      VPCCIDR: 
+        default: "What is the prefix for index.html?"
+      PublicSubnet1Cidr: 
+        default: "What is the Public Subnet 1 CIDR?"
+      PublicSubnet2Cidr: 
+        default: "What is the Public Subnet 2 CIDR?"
+      PrivateSubnet1Cidr: 
+        default: "What is the Private Subnet 1 CIDR?"
+      PrivateSubnet2Cidr: 
+        default: "What is the Private Subnet 2 CIDR?"
+
+Parameters:
+  #Lab Setup
+  BucketName:
+    Description: Bucket Name
+    Type: String
+    Default: "ayman-cloud-engineering-training"
+  LabName:
+    Description: Bucket Name
+    Type: String
+    Default: "CET-014"
+  MandatoryTagKey:
+    Description: Mandantory Tag Key
+    Type: String
+    Default: "CreatedBy"
+  MandatoryTagValue:
+    Description: Mandantory Tag Value
+    Type: String
+    Default: "ayman.zahran@rackspace.com"
+
+  #Lab Parameters
+  VPCCIDR:
+    Description: VPC Cidr
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: "10.0.0.0/16"
+  PublicSubnet1Cidr:
+    Description: Public Subnet 1 Cidr
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: "10.0.0.0/24"
+  PublicSubnet2Cidr:
+    Description: Public Subnet 2 Cidr
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: "10.0.1.0/24"
+  PrivateSubnet1Cidr:
+    Description: Private Subnet 1 Cidr
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: "10.0.10.0/24"
+  PrivateSubnet2Cidr:
+    Description: Private Subnet 2 Cidr
+    Type: String
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: "10.0.11.0/24"
+
+Resources:
+  Networking:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${AWS::Region}.amazonaws.com/${LabName}/VPC_CFN/Networking.yml
+      Tags:
+        - Key: !Ref MandatoryTagKey
+          Value: !Ref MandatoryTagValue
+      Parameters:
+        VPCCIDR: !Ref VPCCIDR
+        PublicSubnet1Cidr: !Ref PublicSubnet1Cidr
+        PublicSubnet2Cidr: !Ref PublicSubnet2Cidr
+        PrivateSubnet1Cidr: !Ref PrivateSubnet1Cidr
+        PrivateSubnet2Cidr: !Ref PrivateSubnet2Cidr
+  ACLs:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: Networking
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${AWS::Region}.amazonaws.com/${LabName}/VPC_CFN/ACLs.yml
+      Tags:
+        - Key: !Ref MandatoryTagKey
+          Value: !Ref MandatoryTagValue

@@ -1,0 +1,34 @@
+namespace: ${namespace}
+cfngin_bucket: ${cfngin_bucket_name}
+
+sys_path: ./
+
+stacks:
+  networking:
+    template_path: templates/VPC_CFN.yml
+    variables:
+      BucketName: "ayman-cloud-engineering-training"
+      LabName: "CET-014"
+      VPCCIDR: "10.0.0.0/16"
+      PublicSubnet1Cidr: "10.0.0.0/24"
+      PublicSubnet2Cidr: "10.0.1.0/24"
+      PrivateSubnet1Cidr: "10.0.10.0/24"
+      PrivateSubnet2Cidr: "10.0.11.0/24"
+    tags:
+      namespace: "CreatedBy"
+      example: "ayman.zahran@rackspace.com"
+  servers:
+    template_path: templates/Servers_CFN.yml
+    requires:
+      - networking
+    variables:
+      BucketName: "ayman-cloud-engineering-training"
+      LabName: "CET-014"
+      KeyPair: "Ayman-KeyPair"
+      BastionAllowedIP: "196.157.41.63"
+      BastionInstanceType: t2.micro
+      PublicInstancesInstanceType: t2.micro
+      PrivateInstancesInstanceType: t2.micro
+    tags:
+      namespace: "CreatedBy"
+      example: "ayman.zahran@rackspace.com"

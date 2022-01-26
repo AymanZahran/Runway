@@ -1,0 +1,287 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  ●	Servers CFN
+    ○	Resources:
+      ■	Bastion host.
+      ■	Web instance in every subnet.
+      ■	Bastion security group (allow ssh from specific IP).
+      ■	Public Instance security group (allow 80 from everywhere, 22 from VPC CIDR).
+      ■	Private Instance security group (allow 80, 22 from VPC CIDR).
+    ○	Parameters:
+      ■	Key name.
+      ■	Bastion allowed IP.
+      ■	Instances types.
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - Label: 
+          default: "Lab Setup"
+        Parameters: 
+          - BucketName
+          - LabName
+          - MandatoryTagKey
+          - MandatoryTagValue
+      - Label: 
+          default: "Lab Parameters"
+        Parameters: 
+          - KeyPair
+          - BastionAllowedIP
+          - BastionInstanceType
+          - PublicInstancesInstanceType
+          - PrivateInstancesInstanceType
+    ParameterLabels: 
+      KeyPair: 
+        default: "What is the Key Pair to be used?"
+      BastionAllowedIP: 
+        default: "What is the Bastion Allowed IP to be used?"
+      BastionInstanceType: 
+        default: "What is the Bastion Instance Type to be used?"
+      PublicInstancesInstanceType: 
+        default: "What is the Public Instances Type to be used?"
+      PrivateInstancesInstanceType: 
+        default: "What is the Private Instances Type to be used?"
+
+Parameters:
+  #Lab Setup
+  BucketName:
+    Description: Bucket Name
+    Type: String
+    Default: "ayman-cloud-engineering-training"
+  LabName:
+    Description: Bucket Name
+    Type: String
+    Default: "CET-014"
+  MandatoryTagKey:
+    Description: Mandantory Tag Key
+    Type: String
+    Default: "CreatedBy"
+  MandatoryTagValue:
+    Description: Mandantory Tag Value
+    Type: String
+    Default: "ayman.zahran@rackspace.com"
+  
+  #Lab Parameters
+  KeyPair:
+    Description: KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: "Ayman-KeyPair"
+  BastionAllowedIP:
+    Description: Bastion Allowed IP
+    Type: String
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})
+    ConstraintDescription: must be a valid IP address of the form x.x.x.x
+  BastionInstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - c1.medium
+      - c1.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c3.large
+      - c3.xlarge
+      - cc2.8xlarge
+      - cg1.4xlarge
+      - cr1.8xlarge
+      - g2.2xlarge
+      - hi1.4xlarge
+      - hs1.8xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - i2.xlarge
+      - m1.large
+      - m1.medium
+      - m1.small
+      - m1.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m2.xlarge
+      - m3.2xlarge
+      - m3.large
+      - m3.medium
+      - m3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - t1.micro
+      - t2.medium
+      - t2.micro
+      - t2.small
+    Description: Instance Type
+
+  PublicInstancesInstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - c1.medium
+      - c1.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c3.large
+      - c3.xlarge
+      - cc2.8xlarge
+      - cg1.4xlarge
+      - cr1.8xlarge
+      - g2.2xlarge
+      - hi1.4xlarge
+      - hs1.8xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - i2.xlarge
+      - m1.large
+      - m1.medium
+      - m1.small
+      - m1.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m2.xlarge
+      - m3.2xlarge
+      - m3.large
+      - m3.medium
+      - m3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - t1.micro
+      - t2.medium
+      - t2.micro
+      - t2.small
+    Description: Instance Type
+
+  PrivateInstancesInstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - c1.medium
+      - c1.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c3.large
+      - c3.xlarge
+      - cc2.8xlarge
+      - cg1.4xlarge
+      - cr1.8xlarge
+      - g2.2xlarge
+      - hi1.4xlarge
+      - hs1.8xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - i2.xlarge
+      - m1.large
+      - m1.medium
+      - m1.small
+      - m1.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m2.xlarge
+      - m3.2xlarge
+      - m3.large
+      - m3.medium
+      - m3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - t1.micro
+      - t2.medium
+      - t2.micro
+      - t2.small
+    Description: Instance Type
+    
+Mappings:
+  AmznLinux2AMIRegionMap:
+    ap-northeast-1:
+      AMIID: ami-02d36247c5bc58c23
+    ap-northeast-2:
+      AMIID: ami-04e8dfc09b22389ad
+    ap-northeast-3:
+      AMIID: ami-026107638e7d599b1
+    ap-south-1:
+      AMIID: ami-041db4a969fe3eb68
+    ap-southeast-1:
+      AMIID: ami-07191cf2912e097a6
+    ap-southeast-2:
+      AMIID: ami-04a81599b183d7908
+    ca-central-1:
+      AMIID: ami-0d8ad3ab25e7abc51
+    eu-central-1:
+      AMIID: ami-047e03b8591f2d48a
+    eu-north-1:
+      AMIID: ami-001c5f3c0a8b3f245
+    eu-west-1:
+      AMIID: ami-0ed961fa828560210
+    eu-west-2:
+      AMIID: ami-074771aa49ab046e7
+    eu-west-3:
+      AMIID: ami-0da7ba92c3c072475
+    sa-east-1:
+      AMIID: ami-07983613af1a3ef44
+    us-east-1:
+      AMIID: ami-01cc34ab2709337aa
+    us-east-2:
+      AMIID: ami-0f19d220602031aed
+    us-west-1:
+      AMIID: ami-0e0bf4b3a0c0e0adc
+    us-west-2:
+      AMIID: ami-0e5b6b6a9f3db6db8
+
+Resources:
+  SGs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${AWS::Region}.amazonaws.com/${LabName}/Servers_CFN/SGs.yml
+      Tags:
+        - Key: !Ref MandatoryTagKey
+          Value: !Ref MandatoryTagValue
+      Parameters:
+        BastionAllowedIP: !Ref BastionAllowedIP
+  BastionHosts:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SGs
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${AWS::Region}.amazonaws.com/${LabName}/Servers_CFN/BastionHosts.yml
+      Tags:
+        - Key: !Ref MandatoryTagKey
+          Value: !Ref MandatoryTagValue
+      Parameters:
+        KeyPair: !Ref KeyPair
+        InstanceType: !Ref BastionInstanceType
+        ImageId: !FindInMap [AmznLinux2AMIRegionMap, !Ref "AWS::Region", AMIID]
+  PublicInstances:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SGs
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${AWS::Region}.amazonaws.com/${LabName}/Servers_CFN/PublicInstances.yml
+      Tags:
+        - Key: !Ref MandatoryTagKey
+          Value: !Ref MandatoryTagValue
+      Parameters:
+        KeyPair: !Ref KeyPair
+        InstanceType: !Ref PublicInstancesInstanceType
+        ImageId: !FindInMap [AmznLinux2AMIRegionMap, !Ref "AWS::Region", AMIID]
+  PrivateInstances:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SGs
+    Properties:
+      TemplateURL: !Sub https://${BucketName}.s3.${AWS::Region}.amazonaws.com/${LabName}/Servers_CFN/PrivateInstances.yml
+      Tags:
+        - Key: !Ref MandatoryTagKey
+          Value: !Ref MandatoryTagValue
+      Parameters:
+        KeyPair: !Ref KeyPair
+        InstanceType: !Ref PrivateInstancesInstanceType
+        ImageId: !FindInMap [AmznLinux2AMIRegionMap, !Ref "AWS::Region", AMIID]
+  
